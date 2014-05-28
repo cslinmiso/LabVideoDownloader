@@ -25,8 +25,7 @@ public class VideoUrlParser {
 		Document doc = new Document("temp");
 		try {
 			doc = Jsoup.connect(urlString).data("query", "") // 請求参數
-					.ignoreContentType(true).userAgent("IE/6.0") // 設置User-Agent
-					.cookie("auth", "token") // 設置 cookie
+					.ignoreContentType(true).userAgent("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.1.4322)") // 設置User-Agent
 					.timeout(10000) // 設置連接超時時間
 					.get();
 		} catch (Exception ex) {
@@ -78,97 +77,4 @@ public class VideoUrlParser {
 		return urlString;
 	}
 
-	public String parseTalkshowCN(String urlString) throws IOException {
-		// 建立連線
-		Document doc = getDocument(urlString);
-		String dlURL = doc.select(".download a").attr("href");
-		doc = getDocument(dlURL);
-		String videoURL = doc.select(".link").attr("href");
-		if ("".equals(videoURL)) {
-			videoURL = null;
-		}
-		return videoURL;
-	}
-
-	public List parseTalkshowCNList(String urlString) throws IOException {
-
-		// 建立連線
-		Document doc = getDocument(urlString);
-
-		// 取得文章總篇數
-		Elements articleCountString = doc.select(".endPage");
-		Integer articleCount = 0;
-		// 宣告變數本文總頁數
-		Elements articlePagesSource;
-		Integer articlePages = 1;
-		String articlePagesLink = urlString.substring(0,
-				urlString.lastIndexOf("/") + 1);
-		if (articleCountString.size() != 0) {
-			try {
-				Pattern regex = Pattern.compile("\\d.+");
-				Matcher regexMatcher = regex.matcher(articleCountString
-						.attr("href"));
-				if (regexMatcher.find()) {
-					articlePages = Integer.parseInt(regexMatcher.group());
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		Elements link;
-		List linkList = new ArrayList();
-		List<String> listData = new ArrayList<String>();
-		// 若有兩頁以上就執行此迴圈
-
-		for (int i = 0; i < articlePages; i++) {
-			urlString = articlePagesLink + (i + 1);
-			doc = getDocument(urlString);
-
-			// 文章進入title節點的class name
-			link = doc.select(".hide_unit_9");
-
-			for (Element e : link) {
-				StringBuffer sb = new StringBuffer();
-				Elements aTag = e.select("H2 > a");
-				String absUrl = aTag.get(0).absUrl("href");
-				String videoUrl = parseTalkshowCN(absUrl);
-				String fileName = absUrl.substring(absUrl.lastIndexOf("/") + 1);
-				String title = aTag.get(0).text();
-				String context = e.select(".m-txt").get(0).ownText();
-				sb.append(fileName).append(VideoUtility.splitTag);
-				sb.append(title).append(VideoUtility.splitTag);
-				sb.append(context).append(VideoUtility.splitTag);
-				sb.append(absUrl).append(VideoUtility.splitTag);
-				sb.append(videoUrl);
-
-				System.out.println(fileName + "--" + absUrl + "----" + title);
-				System.out.println(context + "\n" + videoUrl);
-				if (absUrl != null) {
-					linkList.add(new VideoVO(new String[] { fileName, title,
-							context, absUrl, videoUrl }));
-					listData.add(sb.toString());
-				}
-			}
-		}
-
-		File file = new File("C:\\Conan\\VideoDetail.txt");
-		VideoUtility.writeFile(listData, file);
-
-		// 取得文章連結
-		// link = doc.select("div .yom-mod .story .txt a").not(".more");
-		// --1.在你解析文档时确保有指定base URI，然后
-		// String relHref = link.attr("href"); // == "/"
-		// --2.使用 abs: 属性前缀来取得包含base URI的绝对路径。
-		// String absHref = link.attr("abs:href"); //
-		// "http://www.open-open.com/"
-		//
-
-		if (articleCount == 0) {
-			articleCount = linkList.size();
-		}
-		System.out.println("共 " + articleCount + " 篇文章");
-
-		return linkList;
-	}
 }

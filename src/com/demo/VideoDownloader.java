@@ -86,44 +86,4 @@ class RemoteFile {
 		this.realUrl = realUrl;
 	}
 
-	public InputStream getVideoInputStream(String urlString) {
-		HttpURLConnection conn = null;
-		URL url = null;
-		BufferedReader bf = null;
-		InputStream input = null;
-		try {
-			// 設定url並開啟連線
-			url = new URL(urlString);
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestProperty("content-type", "binary/data");
-			int responseCode = conn.getResponseCode();
-
-			//等候http回應200
-			if (responseCode == HttpURLConnection.HTTP_OK) {
-				String fileName = "";
-				String disposition = conn.getHeaderField("Content-Disposition");
-				String contentType = conn.getContentType();
-				int contentLength = conn.getContentLength();
-
-//				System.out.println("Content-Type = " + contentType);
-//				System.out.println("Content-Disposition = " + disposition);
-//				System.out.println("Content-Length = " + contentLength);
-
-				input = conn.getInputStream();
-
-			}
-		} catch (ProtocolException e) {
-
-		} catch (MalformedURLException e) {
-
-		} catch (IOException e) {
-
-		} finally {
-			if (conn != null) {
-				conn.disconnect();
-			}
-			return input;
-		}
-	}
-
 }
