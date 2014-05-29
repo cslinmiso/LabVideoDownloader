@@ -1,12 +1,8 @@
 package com.demo;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 import com.demo.utility.VideoUtility;
@@ -20,25 +16,27 @@ public class VideoDownloader {
 	 * @param filename
 	 * @param url
 	 */
-	public void saveVideo(String filename, String url) {
-		String tempDir = System.getProperty("java.io.tempdir");
-		String separator = File.pathSeparator;
+	public void saveVideo(String filename, String url) { 
+		String tempPath =  this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		String tempDir = (new File(tempPath)).getParentFile().getPath() ;
+		char separator =  File.separatorChar;
 		String fileFormat = ".mp4";
 		final String filePath = tempDir + separator + filename + fileFormat;
 		final long filesize;
+		// 得到redirect後實際的URL，若不這樣取得，測試時下載youku以及talkshowCN時會有錯誤
 		RemoteFile rf = getRemoteFile(url);
 		long remoteSize = rf.size;
 		final String realUrl = rf.realUrl;
-		// 得到redirect後實際的URL，若不這樣取得，測試時下載youku以及talkshowCN時會有錯誤
-		// System.out.println("實際URL"+realUrl);
-		// System.out.println("暫存檔案大小" + remoteSize);
+//		 System.out.println("實際URL"+realUrl);
+//		 System.out.println("暫存檔案大小" + remoteSize);
+		//續傳判斷
 		File f = new File(filePath);
 		if (f.exists()) {
 			filesize = f.length();
 		} else {
 			filesize = 0;
 		}
-		System.out.println("現有檔案大小為：" + filesize);
+		System.out.println("現有檔案大小為：" + VideoUtility.toMB(filesize)+" MB");
 		if (filesize < remoteSize) {
 			new Thread() {
 				public void run() {
@@ -46,7 +44,7 @@ public class VideoDownloader {
 				}
 			}.start();
 		}else{
-			System.out.println("同樣的檔案已經存在。");
+			System.out.println("實際檔案大小為：" + VideoUtility.toMB(filesize)+" MB\n已下載完成。");
 		}
 	}
 
@@ -60,8 +58,8 @@ public class VideoDownloader {
 		long size = 0;
 		String realUrl = "";
 		try {
-			HttpURLConnection conn = (HttpURLConnection) (new URL(url))
-					.openConnection();
+			URL u = new URL(url);
+			HttpURLConnection conn = (HttpURLConnection)  u.openConnection();
 			size = conn.getContentLength();
 			// 檔案大小
 			realUrl = conn.getURL().toString();
