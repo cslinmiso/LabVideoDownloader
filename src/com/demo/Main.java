@@ -4,26 +4,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Main {
-    
-    static Log logger = LogFactory.getLog(Main.class);
 
-    public static void main(String[] args) {
+	static Log logger = LogFactory.getLog(Main.class);
 
-//        if (args == null || args.length != 2) {
-//            logger.warn("It needs two args: filename and video-url");
-//            return;
-//        }
+	public static void main(String[] args) {
 
-//        String fileName =args[0];
-//        String youtubeUrl =args[1];
-      String fileName ="ABC";
-      String youtubeUrl ="https://www.youtube.com/watch?v=09omAORH2mc";
-        VideoUrlParser parser = new VideoUrlParser();
-        String url = parser.parse(youtubeUrl);
+		if (args == null || args.length != 2) {
+			logger.warn("It needs two args: filename and video-url");
+			return;
+		}
 
-        if (url != null) {
-            VideoDownloader downloader = new VideoDownloader();
-            downloader.saveVideo(fileName, url);
-        }
-    }
+		String fileName = args[0];
+		String youtubeUrl = args[1];
+
+		VideoUrlParser parser = new VideoUrlParser();
+		String url = parser.parse(youtubeUrl);
+
+		if (url != null) {
+			VideoDownloader downloader = new VideoDownloader();
+			downloader.saveVideo(fileName, url);
+		}
+	}
 }

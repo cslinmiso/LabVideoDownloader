@@ -33,8 +33,8 @@
 	    <javac srcdir="${src}" encoding="UTF-8" destdir="${build}"
 			classpathref="classpath" includeAntRuntime="false" />
 	    
-	    <copy todir="src" includeemptydirs="false">
-			<fileset dir="${build}" />
+	    <copy todir="${build}" includeemptydirs="false">
+			<fileset dir="${src}" excludes="**/*.java" />
 		</copy>
 	    <copy todir="${bin}" includeemptydirs="false">
 			<fileset dir="${build}" />
